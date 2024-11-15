@@ -4,12 +4,16 @@
 
 package frc.robot.subsystems;
 
+import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ExampleSubsystem extends SubsystemBase {
+public class SwerveDrive extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  public ExampleSubsystem() {}
+  public SwerveDrive() {}
 
   /**
    * Example command factory method.
@@ -44,4 +48,22 @@ public class ExampleSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
+
+  public Pose2d getPose() {
+    return new Pose2d();
+  }
+  public void choreoController(Pose2d curPose, SwerveSample sample) {
+    PIDController xController = new PIDController(0, 0, 0);
+    PIDController yController = new PIDController(0, 0, 0);
+    PIDController thetaController = new PIDController(0, 0, 0);
+    ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        new ChassisSpeeds(
+            xController.calculate(curPose.getX(), sample.x) + sample.vx,
+            yController.calculate(curPose.getY(), sample.y) + sample.vy,
+            thetaController.calculate(curPose.getRotation().getRadians(), sample.heading) + sample.omega
+        ), curPose.getRotation());
+      this.setChassisSpeeds(speeds);
+  }
+  public void setChassisSpeeds(ChassisSpeeds speeds) {}
+
 }
